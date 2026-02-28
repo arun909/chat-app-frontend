@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/widgets/custom_button.dart';
 import '../notifier/login_state.dart';
 import '../providers/auth_providers.dart';
+import '../../../../features/chat/screens/chat_list_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -40,14 +41,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login successful!')),
         );
-        // Navigate to a blank page on success
+        // Navigate to ChatListScreen on success
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) => Scaffold(
-              appBar: AppBar(title: const Text('Home')),
-              body: const Center(child: Text("Welcome Home!")),
-            ),
+            builder: (context) => const ChatListScreen(),
           ),
         );
       } else if (next is LoginError) {
