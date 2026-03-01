@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../presentation/notifier/user_search_state.dart';
 import '../presentation/providers/chat_providers.dart';
+import 'chat_screen.dart';
 
 class UserSearchScreen extends ConsumerStatefulWidget {
   const UserSearchScreen({super.key});
@@ -75,9 +76,11 @@ class _UserSearchScreenState extends ConsumerState<UserSearchScreen> {
             title: Text(user.username),
             subtitle: Text(user.email),
             onTap: () {
-              // TODO: Implement navigation to chat
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Tapped on ${user.username}')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatScreen(otherUser: user),
+                ),
               );
             },
           );
