@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import '../../auth/data/models/user_model.dart';
 import '../../auth/domain/entities/user_entity.dart';
+import '../models/message_model.dart';
 
 class ChatService {
   final Dio _dio;
@@ -8,9 +8,11 @@ class ChatService {
 
   ChatService(this._dio);
 
+  // ─── Users ────────────────────────────────────────────────────────────────
+
   Future<List<UserEntity>> searchUsers(String query, {String? token}) async {
     try {
-      print('Searching users with query: $query (Token: ${token != null})');
+      print('Searching users with query: $query');
       final response = await _dio.get(
         '$_baseUrl/users/search',
         queryParameters: {'query': query},
@@ -18,39 +20,172 @@ class ChatService {
             ? Options(headers: {'Authorization': 'Bearer $token'})
             : null,
       );
-      
+
       print('Search response: ${response.data}');
 
-      if (response.data['success'] == true) {
-        dynamic data = response.data['data'];
-        List<dynamic> usersData = [];
-        
+      final dynamic responseData = response.data;
+      List<dynamic> usersData = [];
+
+      if (responseData is List) {
+        usersData = responseData;
+      } else if (responseData is Map) {
+        final data = responseData['data'];
         if (data is List) {
           usersData = data;
-        } else if (data is Map && data.containsKey('users')) {
-          usersData = data['users'];
-        } else if (data is Map && data.containsKey('user')) {
-           // Handle case where it returns a single user (though search usually returns a list)
-          usersData = [data['user']];
+        } else if (responseData['users'] is List) {
+          usersData = responseData['users'];
         }
-
-        return usersData.map((userData) {
-          // Robust mapping in case fields are named differently
-          return UserEntity(
-            id: userData['_id'] ?? userData['id'] ?? '',
-            username: userData['username'] ?? userData['name'] ?? 'Unknown',
-            email: userData['email'] ?? '',
-            token: '',
-          );
-        }).toList();
-      } else {
-        throw Exception(response.data['message'] ?? 'Failed to search users');
       }
+
+      return usersData.map((u) {
+        return UserEntity(
+          id: u['_id']?.toString() ?? u['id']?.toString() ?? '',
+          username: u['username']?.toString() ?? u['name']?.toString() ?? 'Unknown',
+          email: u['email']?.toString() ?? '',
+          token: '',
+        );
+      }).toList();
     } on DioException catch (e) {
-      print('Search error: ${e.response?.data}');
-      throw Exception(e.response?.data['message'] ?? 'Network error');
+      final errData = e.response?.data;
+      final msg = errData is Map ? errData['message']?.toString() : null;
+      throw Exception(msg ?? 'Network error');
     } catch (e) {
-      print('Search unexpected error: $e');
+      throw Exception(e.toString());
+    }
+  }
+
+  // ─── Conversations ─────────────────────────────────────────────────────────
+
+  /// Creates or fetches an existing conversation with [otherUserId].
+  /// Returns the conversation ID string.
+  Future<String> getOrCreateConversation(String otherUserId, {String? token}) async {
+    try {
+      print('Creating/fetching conversation with: $otherUserId');
+      final response = await _dio.post(
+        '$_baseUrl/conversations',
+        data: {'otherUserId': otherUserId},
+        options: token != null
+            ? Options(headers: {'Authorization': 'Bearer $token'})
+            : null,
+      );
+
+      print('Conversation response: ${response.data}');
+
+      final dynamic responseData = response.data;
+      dynamic conversationObj;
+
+      if (responseData is Map) {
+        conversationObj = responseData['data'] ?? responseData;
+      } else {
+        conversationObj = responseData;
+      }
+
+      final id = conversationObj['_id']?.toString() ?? conversationObj['id']?.toString();
+      if (id == null || id.isEmpty) {
+        throw Exception('Could not determine conversation ID from response: $responseData');
+      }
+      return id;
+    } on DioException catch (e) {
+      final errData = e.response?.data;
+      final msg = errData is Map ? errData['message']?.toString() : null;
+      throw Exception(msg ?? 'Network error');
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  // ─── Messages ─────────────────────────────────────────────────────────────
+
+  Future<List<MessageModel>> getMessages(String conversationId, {String? token}) async {
+    try {
+      final response = await _dio.get(
+        '$_baseUrl/messages/$conversationId',
+        options: token != null
+            ? Options(headers: {'Authorization': 'Bearer $token'})
+            : null,
+      );
+
+      print('Get messages response: ${response.data}');
+
+      final dynamic responseData = response.data;
+      List<dynamic> messagesData = [];
+
+      if (responseData is List) {
+        messagesData = responseData;
+      } else if (responseData is Map) {
+        final data = responseData['data'];
+        if (data is List) {
+          messagesData = data;
+        } else if (responseData['messages'] is List) {
+          messagesData = responseData['messages'];
+        }
+      }
+
+      return messagesData
+          .map((m) => MessageModel.fromJson(Map<String, dynamic>.from(m as Map)))
+          .toList();
+    } on DioException catch (e) {
+      final errData = e.response?.data;
+      final msg = errData is Map ? errData['message']?.toString() : null;
+      throw Exception(msg ?? 'Network error');
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  /// Sends a message to [conversationId] with [text].
+  Future<MessageModel> sendMessage(String conversationId, String text, {String? token}) async {
+    try {
+      final response = await _dio.post(
+        '$_baseUrl/messages',
+        data: {
+          'conversationId': conversationId,
+          'text': text,
+        },
+        options: token != null
+            ? Options(headers: {'Authorization': 'Bearer $token'})
+            : null,
+      );
+
+      print('Send message response type: ${response.data.runtimeType}');
+      print('Send message response: ${response.data}');
+
+      final dynamic responseData = response.data;
+      Map<String, dynamic>? messageData;
+
+      if (responseData is List && responseData.isNotEmpty) {
+        messageData = Map<String, dynamic>.from(responseData.first as Map);
+      } else if (responseData is Map) {
+        final resMap = Map<String, dynamic>.from(responseData);
+        if (resMap['data'] is Map) {
+          messageData = Map<String, dynamic>.from(resMap['data'] as Map);
+        } else if (resMap.containsKey('_id') || resMap.containsKey('text')) {
+          messageData = resMap;
+        } else {
+          for (final value in resMap.values) {
+            if (value is Map && (value.containsKey('_id') || value.containsKey('text'))) {
+              messageData = Map<String, dynamic>.from(value);
+              break;
+            }
+          }
+        }
+      }
+
+      if (messageData != null) {
+        return MessageModel.fromJson(messageData);
+      }
+      throw Exception('Unexpected response format: $responseData');
+    } on DioException catch (e) {
+      final errData = e.response?.data;
+      String msg = 'Network error';
+      if (errData is Map) {
+        msg = errData['message']?.toString() ?? errData['error']?.toString() ?? msg;
+      } else if (errData is String) {
+        msg = errData;
+      }
+      throw Exception(msg);
+    } catch (e) {
+      print('sendMessage error: $e');
       throw Exception(e.toString());
     }
   }

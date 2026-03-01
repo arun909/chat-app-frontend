@@ -15,8 +15,8 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildCongittext context) {
-    return MaterigfalApp(
+  Widget build(BuildContext context) {
+    return MaterialApp(
       title: 'Chat App',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
