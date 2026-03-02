@@ -20,12 +20,15 @@ class ConversationModel {
       if (p is Map) {
         return UserEntity(
           id: p['_id']?.toString() ?? p['id']?.toString() ?? '',
-          username: p['username']?.toString() ?? p['name']?.toString() ?? 'Unknown',
+          username:
+              p['username']?.toString() ?? p['name']?.toString() ?? 'Unknown',
           email: p['email']?.toString() ?? '',
           token: '',
+          profilePic: p['profilePic']?.toString(),
         );
       }
-      return UserEntity(id: p.toString(), username: 'Unknown', email: '', token: '');
+      return UserEntity(
+          id: p.toString(), username: 'Unknown', email: '', token: '');
     }).toList();
 
     final lastMessageRaw = json['lastMessage'];

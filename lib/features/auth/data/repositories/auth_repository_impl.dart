@@ -1,7 +1,7 @@
+import 'dart:io';
 import '../../domain/entities/user_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../datasources/auth_remote_data_source.dart';
-import '../models/user_model.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
   final AuthRemoteDataSource _remoteDataSource;
@@ -19,12 +19,13 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
       password: password,
     );
-    
+
     return UserEntity(
       id: userModel.id,
       username: userModel.username,
       email: userModel.email,
       token: userModel.token,
+      profilePic: userModel.profilePic,
     );
   }
 
@@ -43,6 +44,32 @@ class AuthRepositoryImpl implements AuthRepository {
       username: userModel.username,
       email: userModel.email,
       token: userModel.token,
+      profilePic: userModel.profilePic,
+    );
+  }
+
+  @override
+  Future<UserEntity> updateProfile({
+    required String token,
+    String? username,
+    String? email,
+    String? password,
+    File? profilePicFile,
+  }) async {
+    final userModel = await _remoteDataSource.updateProfile(
+      token: token,
+      username: username,
+      email: email,
+      password: password,
+      profilePicFile: profilePicFile,
+    );
+
+    return UserEntity(
+      id: userModel.id,
+      username: userModel.username,
+      email: userModel.email,
+      token: userModel.token,
+      profilePic: userModel.profilePic,
     );
   }
 }

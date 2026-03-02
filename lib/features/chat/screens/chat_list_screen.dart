@@ -6,6 +6,7 @@ import '../../auth/presentation/providers/auth_providers.dart';
 import '../../auth/presentation/notifier/login_state.dart';
 import 'chat_screen.dart';
 import 'user_search_screen.dart';
+import '../../auth/presentation/screens/profile_screen.dart';
 
 class ChatListScreen extends ConsumerWidget {
   const ChatListScreen({super.key});
@@ -30,6 +31,38 @@ class ChatListScreen extends ConsumerWidget {
                 ),
               );
             },
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ProfileScreen(),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.only(right: 16.0),
+              child: CircleAvatar(
+                radius: 18,
+                backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                backgroundImage: loginState is LoginSuccess &&
+                        loginState.user.profilePic != null &&
+                        loginState.user.profilePic!.isNotEmpty
+                    ? NetworkImage(
+                        'http://192.168.31.240:5000${loginState.user.profilePic}')
+                    : null,
+                child: loginState is LoginSuccess &&
+                        (loginState.user.profilePic == null ||
+                            loginState.user.profilePic!.isEmpty)
+                    ? Text(
+                        loginState.user.username[0].toUpperCase(),
+                        style: const TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.bold),
+                      )
+                    : null,
+              ),
+            ),
           ),
         ],
       ),
@@ -64,8 +97,9 @@ class ChatListScreen extends ConsumerWidget {
             Text('Error: ${state.message}', textAlign: TextAlign.center),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () =>
-                  ref.read(conversationsNotifierProvider.notifier).getConversations(),
+              onPressed: () => ref
+                  .read(conversationsNotifierProvider.notifier)
+                  .getConversations(),
               child: const Text('Retry'),
             ),
           ],
@@ -109,7 +143,15 @@ class ChatListScreen extends ConsumerWidget {
 
           return ListTile(
             leading: CircleAvatar(
-              child: Text(otherParticipantName[0].toUpperCase()),
+              backgroundImage: otherParticipant.profilePic != null &&
+                      otherParticipant.profilePic!.isNotEmpty
+                  ? NetworkImage(
+                      'http://192.168.31.240:5000${otherParticipant.profilePic}')
+                  : null,
+              child: (otherParticipant.profilePic == null ||
+                      otherParticipant.profilePic!.isEmpty)
+                  ? Text(otherParticipantName[0].toUpperCase())
+                  : null,
             ),
             title: Text(
               otherParticipantName,

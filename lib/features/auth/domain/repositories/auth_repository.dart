@@ -1,3 +1,4 @@
+import 'dart:io';
 import '../entities/user_entity.dart';
 
 abstract class AuthRepository {
@@ -8,7 +9,15 @@ abstract class AuthRepository {
   });
 
   Future<UserEntity> login({
-  required String email,
-  required String password,
-});
+    required String email,
+    required String password,
+  });
+
+  Future<UserEntity> updateProfile({
+    required String token,
+    String? username,
+    String? email,
+    String? password,
+    File? profilePicFile,
+  });
 }

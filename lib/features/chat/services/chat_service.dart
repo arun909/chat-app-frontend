@@ -13,7 +13,6 @@ class ChatService {
 
   Future<List<UserEntity>> searchUsers(String query, {String? token}) async {
     try {
-      print('Searching users with query: $query');
       final response = await _dio.get(
         '$_baseUrl/users/search',
         queryParameters: {'query': query},
@@ -21,8 +20,6 @@ class ChatService {
             ? Options(headers: {'Authorization': 'Bearer $token'})
             : null,
       );
-
-      print('Search response: ${response.data}');
 
       final dynamic responseData = response.data;
       List<dynamic> usersData = [];
@@ -41,9 +38,11 @@ class ChatService {
       return usersData.map((u) {
         return UserEntity(
           id: u['_id']?.toString() ?? u['id']?.toString() ?? '',
-          username: u['username']?.toString() ?? u['name']?.toString() ?? 'Unknown',
+          username:
+              u['username']?.toString() ?? u['name']?.toString() ?? 'Unknown',
           email: u['email']?.toString() ?? '',
           token: '',
+          profilePic: u['profilePic']?.toString(),
         );
       }).toList();
     } on DioException catch (e) {
@@ -59,9 +58,9 @@ class ChatService {
 
   /// Creates or fetches an existing conversation with [otherUserId].
   /// Returns the conversation ID string.
-  Future<String> getOrCreateConversation(String otherUserId, {String? token}) async {
+  Future<String> getOrCreateConversation(String otherUserId,
+      {String? token}) async {
     try {
-      print('Creating/fetching conversation with: $otherUserId');
       final response = await _dio.post(
         '$_baseUrl/conversations',
         data: {'otherUserId': otherUserId},
@@ -69,8 +68,6 @@ class ChatService {
             ? Options(headers: {'Authorization': 'Bearer $token'})
             : null,
       );
-
-      print('Conversation response: ${response.data}');
 
       final dynamic responseData = response.data;
       dynamic conversationObj;
@@ -81,9 +78,11 @@ class ChatService {
         conversationObj = responseData;
       }
 
-      final id = conversationObj['_id']?.toString() ?? conversationObj['id']?.toString();
+      final id = conversationObj['_id']?.toString() ??
+          conversationObj['id']?.toString();
       if (id == null || id.isEmpty) {
-        throw Exception('Could not determine conversation ID from response: $responseData');
+        throw Exception(
+            'Could not determine conversation ID from response: $responseData');
       }
       return id;
     } on DioException catch (e) {
@@ -97,15 +96,12 @@ class ChatService {
 
   Future<List<ConversationModel>> getConversations({String? token}) async {
     try {
-      print('Fetching conversations...');
       final response = await _dio.get(
         '$_baseUrl/conversations',
         options: token != null
             ? Options(headers: {'Authorization': 'Bearer $token'})
             : null,
       );
-
-      print('Get conversations response: ${response.data}');
 
       final dynamic responseData = response.data;
       List<dynamic> conversationsData = [];
@@ -122,7 +118,8 @@ class ChatService {
       }
 
       return conversationsData
-          .map((c) => ConversationModel.fromJson(Map<String, dynamic>.from(c as Map)))
+          .map((c) =>
+              ConversationModel.fromJson(Map<String, dynamic>.from(c as Map)))
           .toList();
     } on DioException catch (e) {
       final errData = e.response?.data;
@@ -135,7 +132,8 @@ class ChatService {
 
   // ─── Messages ─────────────────────────────────────────────────────────────
 
-  Future<List<MessageModel>> getMessages(String conversationId, {String? token}) async {
+  Future<List<MessageModel>> getMessages(String conversationId,
+      {String? token}) async {
     try {
       final response = await _dio.get(
         '$_baseUrl/messages/$conversationId',
@@ -143,8 +141,6 @@ class ChatService {
             ? Options(headers: {'Authorization': 'Bearer $token'})
             : null,
       );
-
-      print('Get messages response: ${response.data}');
 
       final dynamic responseData = response.data;
       List<dynamic> messagesData = [];
@@ -161,7 +157,8 @@ class ChatService {
       }
 
       return messagesData
-          .map((m) => MessageModel.fromJson(Map<String, dynamic>.from(m as Map)))
+          .map(
+              (m) => MessageModel.fromJson(Map<String, dynamic>.from(m as Map)))
           .toList();
     } on DioException catch (e) {
       final errData = e.response?.data;
@@ -173,7 +170,8 @@ class ChatService {
   }
 
   /// Sends a message to [conversationId] with [text].
-  Future<MessageModel> sendMessage(String conversationId, String text, {String? token}) async {
+  Future<MessageModel> sendMessage(String conversationId, String text,
+      {String? token}) async {
     try {
       final response = await _dio.post(
         '$_baseUrl/messages',
@@ -185,9 +183,6 @@ class ChatService {
             ? Options(headers: {'Authorization': 'Bearer $token'})
             : null,
       );
-
-      print('Send message response type: ${response.data.runtimeType}');
-      print('Send message response: ${response.data}');
 
       final dynamic responseData = response.data;
       Map<String, dynamic>? messageData;
@@ -202,7 +197,8 @@ class ChatService {
           messageData = resMap;
         } else {
           for (final value in resMap.values) {
-            if (value is Map && (value.containsKey('_id') || value.containsKey('text'))) {
+            if (value is Map &&
+                (value.containsKey('_id') || value.containsKey('text'))) {
               messageData = Map<String, dynamic>.from(value);
               break;
             }
@@ -218,13 +214,14 @@ class ChatService {
       final errData = e.response?.data;
       String msg = 'Network error';
       if (errData is Map) {
-        msg = errData['message']?.toString() ?? errData['error']?.toString() ?? msg;
+        msg = errData['message']?.toString() ??
+            errData['error']?.toString() ??
+            msg;
       } else if (errData is String) {
         msg = errData;
       }
       throw Exception(msg);
     } catch (e) {
-      print('sendMessage error: $e');
       throw Exception(e.toString());
     }
   }
