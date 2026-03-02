@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import '../../auth/domain/entities/user_entity.dart';
 import '../models/message_model.dart';
+import '../models/conversation_model.dart';
 
 class ChatService {
   final Dio _dio;
@@ -85,6 +86,44 @@ class ChatService {
         throw Exception('Could not determine conversation ID from response: $responseData');
       }
       return id;
+    } on DioException catch (e) {
+      final errData = e.response?.data;
+      final msg = errData is Map ? errData['message']?.toString() : null;
+      throw Exception(msg ?? 'Network error');
+    } catch (e) {
+      throw Exception(e.toString());
+    }
+  }
+
+  Future<List<ConversationModel>> getConversations({String? token}) async {
+    try {
+      print('Fetching conversations...');
+      final response = await _dio.get(
+        '$_baseUrl/conversations',
+        options: token != null
+            ? Options(headers: {'Authorization': 'Bearer $token'})
+            : null,
+      );
+
+      print('Get conversations response: ${response.data}');
+
+      final dynamic responseData = response.data;
+      List<dynamic> conversationsData = [];
+
+      if (responseData is List) {
+        conversationsData = responseData;
+      } else if (responseData is Map) {
+        final data = responseData['data'];
+        if (data is List) {
+          conversationsData = data;
+        } else if (responseData['conversations'] is List) {
+          conversationsData = responseData['conversations'];
+        }
+      }
+
+      return conversationsData
+          .map((c) => ConversationModel.fromJson(Map<String, dynamic>.from(c as Map)))
+          .toList();
     } on DioException catch (e) {
       final errData = e.response?.data;
       final msg = errData is Map ? errData['message']?.toString() : null;

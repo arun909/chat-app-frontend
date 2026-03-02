@@ -6,10 +6,22 @@ import '../notifier/user_search_notifier.dart';
 import '../notifier/user_search_state.dart';
 import '../notifier/chat_notifier.dart';
 import '../notifier/chat_state.dart';
+import '../notifier/conversations_notifier.dart';
+import '../notifier/conversations_state.dart';
 
 final chatServiceProvider = Provider<ChatService>((ref) {
   final dio = ref.watch(dioProvider);
   return ChatService(dio);
+});
+
+final conversationsNotifierProvider = StateNotifierProvider<ConversationsNotifier, ConversationsState>((ref) {
+  final chatService = ref.watch(chatServiceProvider);
+  final loginState = ref.watch(loginNotifierProvider);
+  String? token;
+  if (loginState is LoginSuccess) {
+    token = loginState.user.token;
+  }
+  return ConversationsNotifier(chatService, token);
 });
 
 final userSearchNotifierProvider = StateNotifierProvider<UserSearchNotifier, UserSearchState>((ref) {
