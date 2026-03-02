@@ -2,22 +2,23 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Primary Colors
-  static const Color primary = Color(0xFF2196F3); // Blue
-  static const Color primaryDark = Color(0xFF1976D2);
-  static const Color primaryLight = Color(0xFFBBDEFB);
+  // Primary Colors - Professional Indigo/Slate palette
+  static const Color primary = Color(0xFF1A237E); // Deep Indigo
+  static const Color primaryDark = Color(0xFF000051);
+  static const Color primaryLight = Color(0xFF534BAE);
 
-  // Background Colors
-  static const Color background = Color(0xFFF5F5F5);
+  // Background Colors - Softer background
+  static const Color background = Color(0xFFF8F9FA);
   static const Color surface = Colors.white;
 
   // Text Colors
-  static const Color textPrimary = Color(0xFF212121);
-  static const Color textSecondary = Color(0xFF757575);
+  static const Color textPrimary = Color(0xFF263238); // Blue Grey 900
+  static const Color textSecondary = Color(0xFF546E7A); // Blue Grey 600
 
   // Status Colors
-  static const Color error = Color(0xFFD32F2F);
-  static const Color success = Color(0xFF388E3C);
+  static const Color error = Color(0xFFD32D2D);
+  static const Color success = Color(0xFF2E7D32);
 
   // Other
-  static const Color grey = Color(0xFF9E9E9E);
+  static const Color grey = Color(0xFFCFD8DC); // Blue Grey 100
 }
