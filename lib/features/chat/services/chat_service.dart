@@ -2,10 +2,11 @@ import 'package:dio/dio.dart';
 import '../../auth/domain/entities/user_entity.dart';
 import '../models/message_model.dart';
 import '../models/conversation_model.dart';
+import '../../../../core/constants/api_constants.dart';
 
 class ChatService {
   final Dio _dio;
-  static const String _baseUrl = 'http://192.168.31.240:5000/api';
+  static const String _baseUrl = ApiConstants.baseUrl;
 
   ChatService(this._dio);
 

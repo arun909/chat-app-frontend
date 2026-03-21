@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import '../models/user_model.dart';
 
+import '../../../../core/constants/api_constants.dart';
+
 class AuthRemoteDataSource {
   final Dio _dio;
-  static const String _baseUrl = 'http://192.168.31.240:5000/api';
+  static const String _baseUrl = ApiConstants.baseUrl;
 
   AuthRemoteDataSource(this._dio);
 

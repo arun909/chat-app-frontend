@@ -19,6 +19,12 @@ class AppColors {
   static const Color error = Color(0xFFD32D2D);
   static const Color success = Color(0xFF2E7D32);
 
+  // Dark Theme Colors
+  static const Color darkBackground = Color(0xFF0B141B);
+  static const Color darkSurface = Color(0xFF1E2A30);
+  static const Color tealAccent = Color.fromARGB(255, 77, 224, 101);
+  static const Color darkGrey = Color(0xFF8E9BA5);
+
   // Other
   static const Color grey = Color(0xFFCFD8DC); // Blue Grey 100
 }
