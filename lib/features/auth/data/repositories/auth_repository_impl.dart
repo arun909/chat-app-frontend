@@ -19,11 +19,12 @@ class AuthRepositoryImpl implements AuthRepository {
       email: email,
       password: password,
     );
-    
+
     return UserEntity(
       id: userModel.id,
       username: userModel.username,
       email: userModel.email,
+      profilePic: userModel.profilePic,
       token: userModel.token,
     );
   }
@@ -42,6 +43,7 @@ class AuthRepositoryImpl implements AuthRepository {
       id: userModel.id,
       username: userModel.username,
       email: userModel.email,
+      profilePic: userModel.profilePic,
       token: userModel.token,
     );
   }

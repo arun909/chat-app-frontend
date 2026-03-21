@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/domain/entities/user_entity.dart';
 import '../../auth/presentation/notifier/login_state.dart';
 import '../../auth/presentation/providers/auth_providers.dart';
+import '../../../core/constants/colors.dart';
+import '../../../core/constants/api_constants.dart';
 import '../presentation/notifier/chat_state.dart';
 import '../presentation/providers/chat_providers.dart';
 
@@ -49,20 +51,80 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
 
     return Scaffold(
+      backgroundColor: AppColors.darkBackground,
       appBar: AppBar(
+        backgroundColor: AppColors.darkBackground,
+        elevation: 0,
+        centerTitle: false,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Row(
           children: [
-            const CircleAvatar(radius: 16, child: Icon(Icons.person, size: 20)),
-            const SizedBox(width: 8),
-            Text(widget.otherUser.username),
+            CircleAvatar(
+              radius: 18,
+              backgroundColor: AppColors.darkSurface,
+              backgroundImage: widget.otherUser.profilePic != null &&
+                      widget.otherUser.profilePic!.isNotEmpty
+                  ? NetworkImage(
+                      '${ApiConstants.serverUrl}${widget.otherUser.profilePic}')
+                  : null,
+              child: (widget.otherUser.profilePic == null ||
+                      widget.otherUser.profilePic!.isEmpty)
+                  ? Text(
+                      widget.otherUser.username.isNotEmpty
+                          ? widget.otherUser.username[0].toUpperCase()
+                          : '',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    )
+                  : null,
+            ),
+            const SizedBox(width: 12),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.otherUser.username,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const Text(
+                  'Online',
+                  style: TextStyle(
+                    color: AppColors.tealAccent,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
-      ),
-      body: Column(
-        children: [
-          Expanded(child: _buildMessageList(chatState, myId)),
-          _buildMessageInput(chatState),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.more_vert, color: AppColors.darkGrey),
+            onPressed: () {},
+          ),
+          const SizedBox(width: 8),
         ],
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.darkBackground,
+        ),
+        child: Column(
+          children: [
+            Expanded(child: _buildMessageList(chatState, myId)),
+            _buildMessageInput(chatState),
+          ],
+        ),
       ),
     );
   }
@@ -77,11 +139,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Error: ${state.message}', style: const TextStyle(color: Colors.red)),
+            Text('Error: ${state.message}',
+                style: const TextStyle(color: Colors.red)),
             const SizedBox(height: 8),
             ElevatedButton(
-              onPressed: () =>
-                  ref.read(chatNotifierProvider(widget.otherUser.id).notifier).getMessages(),
+              onPressed: () => ref
+                  .read(chatNotifierProvider(widget.otherUser.id).notifier)
+                  .getMessages(),
               child: const Text('Retry'),
             ),
           ],
@@ -93,7 +157,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       final messages = state.messages;
       if (messages.isEmpty) {
         return const Center(
-          child: Text('No messages yet. Say hi! 👋', style: TextStyle(color: Colors.grey)),
+          child: Text('No messages yet. Say hi! 👋',
+              style: TextStyle(color: Colors.grey)),
         );
       }
 
@@ -108,17 +173,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           return Align(
             alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
             child: Container(
-              margin: const EdgeInsets.symmetric(vertical: 3),
+              margin: const EdgeInsets.symmetric(vertical: 4),
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.72),
+              constraints: BoxConstraints(
+                  maxWidth: MediaQuery.of(context).size.width * 0.75),
               decoration: BoxDecoration(
-                color: isMe ? Theme.of(context).primaryColor : Colors.grey[300],
+                color: isMe ? AppColors.darkSurface : AppColors.darkSurface,
+                border: isMe
+                    ? Border.all(color: AppColors.tealAccent.withOpacity(0.3))
+                    : null,
                 borderRadius: BorderRadius.only(
                   topLeft: const Radius.circular(16),
                   topRight: const Radius.circular(16),
                   bottomLeft: Radius.circular(isMe ? 16 : 4),
                   bottomRight: Radius.circular(isMe ? 4 : 16),
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 2,
+                    offset: const Offset(0, 1),
+                  ),
+                ],
               ),
               child: Column(
                 crossAxisAlignment:
@@ -126,15 +202,28 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 children: [
                   Text(
                     message.text,
-                    style: TextStyle(color: isMe ? Colors.white : Colors.black87),
+                    style: const TextStyle(color: Colors.white, fontSize: 15),
                   ),
-                  const SizedBox(height: 3),
-                  Text(
-                    '${message.createdAt.hour}:${message.createdAt.minute.toString().padLeft(2, '0')}',
-                    style: TextStyle(
-                      color: isMe ? Colors.white60 : Colors.black45,
-                      fontSize: 10,
-                    ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${message.createdAt.hour}:${message.createdAt.minute.toString().padLeft(2, '0')}',
+                        style: const TextStyle(
+                          color: AppColors.darkGrey,
+                          fontSize: 10,
+                        ),
+                      ),
+                      if (isMe) ...[
+                        const SizedBox(width: 4),
+                        const Icon(
+                          Icons.done_all,
+                          size: 14,
+                          color: AppColors.tealAccent,
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -153,41 +242,59 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
 
     return SafeArea(
       child: Container(
-        padding: const EdgeInsets.fromLTRB(12, 8, 8, 8),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
-          boxShadow: [BoxShadow(blurRadius: 4, color: Colors.black.withOpacity(0.05))],
+          color: AppColors.darkBackground,
+          border: Border(
+            top: BorderSide(color: AppColors.darkSurface, width: 1),
+          ),
         ),
         child: Row(
           children: [
             Expanded(
-              child: TextField(
-                controller: _messageController,
-                enabled: hasConversation,
-                decoration: InputDecoration(
-                  hintText: hasConversation ? 'Type a message...' : 'Loading chat...',
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(24),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: AppColors.darkSurface,
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                onSubmitted: (_) => _sendMessage(),
+                child: TextField(
+                  controller: _messageController,
+                  enabled: hasConversation,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: hasConversation
+                        ? 'Type a message...'
+                        : 'Loading chat...',
+                    hintStyle: const TextStyle(color: AppColors.darkGrey),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 12),
+                  ),
+                  onSubmitted: (_) => _sendMessage(),
+                ),
               ),
             ),
-            const SizedBox(width: 6),
-            IconButton(
-              onPressed: (isSending || !hasConversation) ? null : _sendMessage,
-              icon: isSending
-                  ? const SizedBox(
-                      width: 22,
-                      height: 22,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(Icons.send_rounded),
-              color: Theme.of(context).primaryColor,
+            const SizedBox(width: 12),
+            Container(
+              decoration: const BoxDecoration(
+                color: AppColors.tealAccent,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                onPressed:
+                    (isSending || !hasConversation) ? null : _sendMessage,
+                icon: isSending
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.black),
+                        ),
+                      )
+                    : const Icon(Icons.send_rounded, color: Colors.black),
+              ),
             ),
           ],
         ),
@@ -207,7 +314,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to send: $e'), backgroundColor: Colors.red),
+          SnackBar(
+              content: Text('Failed to send: $e'), backgroundColor: Colors.red),
         );
       }
     }

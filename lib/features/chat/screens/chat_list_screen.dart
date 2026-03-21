@@ -8,12 +8,9 @@ import '../../auth/presentation/providers/auth_providers.dart';
 import '../../auth/presentation/notifier/login_state.dart';
 import 'chat_screen.dart';
 import 'user_search_screen.dart';
-<<<<<<< Updated upstream
-=======
 import '../../../core/constants/api_constants.dart';
 import '../../../core/constants/colors.dart';
 import '../widgets/chat_tile.dart';
->>>>>>> Stashed changes
 
 class ChatListScreen extends ConsumerWidget {
   const ChatListScreen({super.key});
@@ -74,8 +71,6 @@ class ChatListScreen extends ConsumerWidget {
               );
             },
           ),
-<<<<<<< Updated upstream
-=======
           IconButton(
             icon: const Icon(
               Icons.more_vert,
@@ -123,7 +118,6 @@ class ChatListScreen extends ConsumerWidget {
               ),
             ),
           ),
->>>>>>> Stashed changes
         ],
       ),
       body: Column(
@@ -251,8 +245,9 @@ class ChatListScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             ElevatedButton(
-              onPressed: () =>
-                  ref.read(conversationsNotifierProvider.notifier).getConversations(),
+              onPressed: () => ref
+                  .read(conversationsNotifierProvider.notifier)
+                  .getConversations(),
               child: const Text('Retry'),
             ),
           ],
@@ -294,25 +289,9 @@ class ChatListScreen extends ConsumerWidget {
             orElse: () => conversation.participants.first,
           );
 
-<<<<<<< Updated upstream
-          return ListTile(
-            leading: CircleAvatar(
-              child: Text(otherParticipantName[0].toUpperCase()),
-            ),
-            title: Text(
-              otherParticipantName,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(
-              lastMessage?.text ?? 'Started a conversation',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-=======
           return ChatTile(
             conversation: conversation,
             currentUserId: currentUserId,
->>>>>>> Stashed changes
             onTap: () {
               Navigator.push(
                 context,
