@@ -7,16 +7,19 @@ class UserModel {
   final String id;
   final String username;
   final String email;
+  final String? profilePic;
   final String? token;
 
   const UserModel({
     required this.id,
     required this.username,
     required this.email,
+    this.profilePic,
     this.token,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) => _$UserModelFromJson(json);
+  factory UserModel.fromJson(Map<String, dynamic> json) =>
+      _$UserModelFromJson(json);
 
   Map<String, dynamic> toJson() => _$UserModelToJson(this);
 }

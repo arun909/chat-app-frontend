@@ -10,7 +10,12 @@ import '../notifier/login_state.dart';
 import '../notifier/register_notifier.dart';
 import '../notifier/register_state.dart';
 
-final dioProvider = Provider<Dio>((ref) => Dio());
+final dioProvider = Provider<Dio>((ref) => Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 5),
+      ),
+    ));
 
 final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
   final dio = ref.watch(dioProvider);
